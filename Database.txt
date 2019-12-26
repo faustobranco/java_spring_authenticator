@@ -1,0 +1,152 @@
+create user usr_authentication WITH PASSWORD '1234qwer';
+
+CREATE DATABASE svc_authentication
+WITH OWNER = usr_authentication
+    ENCODING = 'UTF8'
+    TABLESPACE = pg_default
+    LC_COLLATE = 'en_US.UTF-8'
+    LC_CTYPE = 'en_US.UTF-8'
+    CONNECTION LIMIT = -1;
+GRANT CONNECT, TEMPORARY ON DATABASE svc_authentication TO public;
+GRANT ALL ON DATABASE svc_authentication TO postgres;
+GRANT ALL PRIVILEGES ON DATABASE svc_authentication TO usr_authentication;
+
+
+\connect svc_authentication
+
+SET ROLE usr_authentication;
+
+CREATE TABLE tb_users (
+  user_id Int Not NULL,
+  user_name VARCHAR(50) NOT NULL,
+  user_email VARCHAR(50) NOT NULL,
+  password VARCHAR(100) NOT NULL,
+  enabled boolean NOT NULL DEFAULT true,
+  PRIMARY KEY (user_id)
+);
+
+CREATE UNIQUE INDEX idx_users_email ON tb_users (user_email);
+
+CREATE TABLE tb_roles (
+    role_id Int Not NULL,
+    role_name VarChar(50) Not Null,
+    role_weight Int Not Null,
+    PRIMARY KEY (role_id)
+);
+
+CREATE TABLE tb_users_roles (
+  user_id Int Not NULL,
+  role_id Int NOT NULL,
+  PRIMARY KEY (user_id, role_id),
+  FOREIGN KEY (user_id) REFERENCES tb_users (user_id),
+  FOREIGN KEY (role_id) REFERENCES tb_roles (role_id)
+);
+
+CREATE TABLE tb_pages (
+    page_id int Not Null,
+    page_name VarChar(50) not null,
+    page_desc VarChar(255) not null,
+    PRIMARY KEY (page_id)
+);
+
+CREATE TABLE tb_page_roles (
+    page_id Int Not Null,
+    role_id Int Not Null,
+    PRIMARY KEY (page_id, role_id),
+    FOREIGN KEY (page_id) REFERENCES tb_pages (page_id),
+    FOREIGN KEY (role_id) REFERENCES tb_roles (role_id)
+    );
+
+
+CREATE TABLE tb_page_redirect_roles (
+    page_id Int Not Null,
+    role_id Int Not Null,
+    PRIMARY KEY (page_id, role_id),
+    FOREIGN KEY (page_id) REFERENCES tb_pages (page_id),
+    FOREIGN KEY (role_id) REFERENCES tb_roles (role_id)
+    );
+
+
+-- Users:
+
+edwin.stafford@email.com - 1234qwer
+ernie.compton@email.com - qwer1234
+willie.hardin@email.com - easy123
+dorian.cowan@email.com - 123easy
+elvis.kramer@email.com - pass123
+
+INSERT INTO tb_users (user_id, user_name, user_email, password, enabled)
+  values (1, 'Edwin Stafford', 'edwin.stafford@email.com', '$2a$10$lZ9TeALp8DxzKKLDGOfxseXt2eyY0vS1xnlKpulpDABgusaXKxAaa', true);
+
+INSERT INTO tb_users (user_id, user_name, user_email, password, enabled)
+  values (2, 'Ernie Compton', 'ernie.compton@email.com', '$2a$10$0wC84Huh2f8RAdOjVahBHOMLT4mZpdkWmc0VFrUzWpic6qbehmx.G', true);
+
+INSERT INTO tb_users (user_id, user_name, user_email, password, enabled)
+  values (3, 'Willie Hardin', 'willie.hardin@email.com', '$2a$10$CPBuN98cSAuNqzlVOC.oTu1UQgxpXIqbAUdD7rH1ZuU.FPqzscpRu', true);
+
+INSERT INTO tb_users (user_id, user_name, user_email, password, enabled)
+  values (4, 'Dorian Cowan', 'dorian.cowan@email.com', '$2a$10$y7VIE3cE7ZsQhjRjVqBU8erwLewjWBXYAPImlTQ8/p2EgkVvYM8zS', true);
+
+INSERT INTO tb_users (user_id, user_name, user_email, password, enabled)
+  values (5, 'Elvis Kramer', 'elvis.kramer@email.com', '$2a$10$ok38UAuaO4MibcjB7JgW0eoAxYe.wm5Evgj.kBc1j5SQvqri4xjJK', true);
+
+
+-- Roles:
+INSERT INTO tb_roles (role_id, role_name, role_weight) values (1, 'Admin', 1);
+INSERT INTO tb_roles (role_id, role_name, role_weight) values (2, 'Normal_User', 10);
+
+-- User Roles;
+
+Insert Into tb_users_roles (user_id, role_id) values (1, 1);
+Insert Into tb_users_roles (user_id, role_id) values (1, 2);
+Insert Into tb_users_roles (user_id, role_id) values (2, 1);
+Insert Into tb_users_roles (user_id, role_id) values (3, 2);
+Insert Into tb_users_roles (user_id, role_id) values (4, 2);
+Insert Into tb_users_roles (user_id, role_id) values (5, 2);
+
+-- Pages:
+Insert Into tb_pages (page_id, page_name, page_desc) values (1, 'homePage', 'Home Page');
+Insert Into tb_pages (page_id, page_name, page_desc) values (2, 'userPage', 'Only User Page');
+Insert Into tb_pages (page_id, page_name, page_desc) values (3, 'adminPage', 'Only Admin Page');
+
+-- Pages Roles:
+
+Insert Into tb_page_roles (page_id, role_id) values (1,1);
+Insert Into tb_page_roles (page_id, role_id) values (1,2);
+Insert Into tb_page_roles (page_id, role_id) values (2,2);
+Insert Into tb_page_roles (page_id, role_id) values (3,1);
+
+-- Login Redirect Page by Roles:
+Insert Into tb_page_redirect_roles (page_id, role_id) values (3,1);
+Insert Into tb_page_redirect_roles (page_id, role_id) values (1,2);
+
+
+
+
+
+svc_authentication=> select user_email, password, enabled from tb_users where user_email = 'edwin.stafford@email.com';
+        user_email        |                           password                           | enabled
+--------------------------+--------------------------------------------------------------+---------
+ edwin.stafford@email.com | $2a$10$lZ9TeALp8DxzKKLDGOfxseXt2eyY0vS1xnlKpulpDABgusaXKxAaa | t
+
+
+ Select user_email as email, role_name as authority
+   from tb_users
+        inner join tb_users_roles On tb_users.user_id = tb_users_roles.user_id
+        inner join tb_roles On tb_users_roles.role_id = tb_roles.role_id
+  Where tb_users.user_email = 'dorian.cowan@email.com';
+
+
+Select page_name, role_name
+  from tb_pages
+       inner join tb_page_roles On tb_pages.page_id = tb_page_roles.page_id
+       inner join tb_roles On tb_page_roles.role_id = tb_roles.role_id;
+
+SELECT tb_users.user_name, tb_users.user_email, string_agg(tb_roles.role_name, ', ' ORDER BY tb_roles.role_weight) AS role_list, string_agg(tb_pages.page_name, ', ' ORDER BY tb_roles.role_weight) AS page_redirect_list
+  FROM tb_users
+       INNER JOIN tb_users_roles On tb_users.user_id = tb_users_roles.user_id
+       INNER JOIN tb_roles On tb_users_roles.role_id = tb_roles.role_id
+       INNER JOIN tb_page_redirect_roles On tb_users_roles.role_id = tb_page_redirect_roles.role_id
+       INNER JOIN tb_pages On tb_page_redirect_roles.page_id = tb_pages.page_id
+ WHERE tb_users.user_email = 'edwin.stafford@email.com'
+ GROUP BY tb_users.user_name, tb_users.user_email;
