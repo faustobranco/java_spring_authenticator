@@ -14,7 +14,7 @@ Some of the examples shown here that are persisted in database:
   ## Getting Started
   
 
-The project, done in Java 8 using IntelliJ 2019.3 and Maven, simply shows examples of using BCryptPasswordEncoder passwords encode ** for reference only **:
+The project, done in Java 8 using IntelliJ 2019.3 and Maven, simply shows examples of using org.springframework.boot,  passwords encode ** for reference only **:
 
 The database.txt file has all scripts for database creation, database user, schema, inserts of the data used in the example.
 
