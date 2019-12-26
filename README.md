@@ -25,11 +25,17 @@ The login information in the database is in a yaml file (config.yaml), read usin
 Some information from the Java classes:
 
 **AppConfig** Creates a datasource to use for database connections for authentication.
+
 **WebAuthenticationSuccessHandler** - Used to successfully capture the authentication event and redirect the user to the page configured at tb_page_redirect_roles.
+
 **WebSecurityConfig** - Used for loading user database information for authentication and page permissions by roles.
+
 **LoginController** - RequestMapping of pages and loading information for the user class.
-**AES** - Encryption and decryption of yaml file settings (config.yaml)
+
+**AES** - Encryption and decryption of yaml file settings (config.yaml).
+
 **LoadConfiguration** - Reading and loading src / main / resources / config.yaml file information for the appConfiguration class
+
 
 There is also redirection to error pages like 404 (Page not found) and 403 (Access Forbidden)
 
