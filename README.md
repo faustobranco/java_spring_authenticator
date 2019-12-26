@@ -11,7 +11,7 @@ Some of the examples shown here that are persisted in database:
 - Access permissions to pages according to roles;
 - Redirection of pages according to the user's role;
 
-  ## Getting Started
+## Getting Started
   
 
 The project, done in Java 8 using IntelliJ 2019.3 and Maven, simply shows examples of using org.springframework.boot,  passwords encode ** for reference only **:
@@ -34,9 +34,13 @@ Some information from the Java classes:
 There is also redirection to error pages like 404 (Page not found) and 403 (Access Forbidden)
 
 
-  ## Database Model
+## Database Model
+
+![Image of Database Model](https://github.com/faustobranco/java_spring_authenticator/blob/master/readme_images/database_model.png)
 
 ## Web Pages
+
+![Image of Web Pages](https://github.com/faustobranco/java_spring_authenticator/blob/master/readme_images/web_pages.png)
 
 
 ## Maven:
